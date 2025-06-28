@@ -20,4 +20,6 @@ public class User {
     private String password;
 
     private String role;
+
+    private Long tokenVersion = 0L;  // Initialized to 0
 }

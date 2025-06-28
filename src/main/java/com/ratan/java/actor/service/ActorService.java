@@ -1,5 +1,6 @@
 package com.ratan.java.actor.service;
 
+import com.ratan.java.actor.dto.GenericSearchRequest;
 import com.ratan.java.actor.entity.Actor;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface ActorService {
     void deleteActor(Integer id);
 
     Page<Actor> getActorsWithPagination(Pageable pageable);
+
+    Page<Actor> dynamicSearch(GenericSearchRequest request, Pageable pageable);
 }

@@ -1,10 +1,13 @@
 package com.ratan.java.actor.service;
 
+import com.ratan.java.actor.dto.GenericSearchRequest;
+import com.ratan.java.actor.dto.SpecificationBuilder;
 import com.ratan.java.actor.entity.Actor;
 import com.ratan.java.actor.repo.ActorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,5 +53,12 @@ public class ActorServiceImpl implements ActorService {
     @Override
     public Page<Actor> getActorsWithPagination(Pageable pageable) {
         return actorRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Actor> dynamicSearch(GenericSearchRequest request, Pageable pageable) {
+        SpecificationBuilder<Actor> builder = new SpecificationBuilder<>();
+        Specification<Actor> spec = builder.buildFromFilters(request.getFilters());
+        return actorRepository.findAll(spec, pageable);
     }
 }

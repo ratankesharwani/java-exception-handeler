@@ -1,10 +1,13 @@
 package com.ratan.java.actor.controller;
 
+import com.ratan.java.actor.dto.GenericSearchRequest;
 import com.ratan.java.actor.entity.Actor;
 import com.ratan.java.actor.service.ActorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,5 +50,15 @@ public class ActorController {
     @GetMapping("/paged")
     public ResponseEntity<Page<Actor>> getActorsWithPagination(Pageable pageable) {
         return ResponseEntity.ok(actorService.getActorsWithPagination(pageable));
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<Page<Actor>> searchActors(@RequestBody GenericSearchRequest request) {
+        Pageable pageable = PageRequest.of(
+                request.getPage(),
+                request.getSize(),
+                Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy())
+        );
+        return ResponseEntity.ok(actorService.dynamicSearch(request, pageable));
     }
 }

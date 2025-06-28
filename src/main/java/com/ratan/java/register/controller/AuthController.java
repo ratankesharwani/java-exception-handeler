@@ -5,6 +5,7 @@ import com.ratan.java.exception.UsernameNotFoundException;
 import com.ratan.java.jwt.JwtUtil;
 import com.ratan.java.register.dto.LoginRequest;
 import com.ratan.java.register.dto.RegisterRequest;
+import com.ratan.java.register.dto.Role;
 import com.ratan.java.register.entity.User;
 import com.ratan.java.register.repo.UserRepository;
 import com.ratan.java.response.ApiResponse;
@@ -43,9 +44,13 @@ public class AuthController {
             throw new InvalidPasswordException("Invalid password");
         }
 
-        String token = jwtUtil.generateToken(user.getUsername());
+        // Bump token version to invalidate old tokens
+        user.setTokenVersion(user.getTokenVersion() + 1);
+        userRepository.save(user);
+
+        String token = jwtUtil.generateToken(user.getUsername(),user.getTokenVersion());
         Map<String, String> tokenResponse = new HashMap<>();
-        tokenResponse.put("token", token);
+        tokenResponse.put("token", "Bearer " + token);
         return ResponseEntity.ok(
                 ApiResponse.<Map<String, String>>builder()
                         .timestamp(LocalDateTime.now())
@@ -64,10 +69,16 @@ public class AuthController {
             throw new UsernameNotFoundException("Username already exists");
         }
 
+        Role finalRole = Role.USER;
+        if (request.getRole() != null) {
+            finalRole = Role.fromValue(request.getRole());
+        }
+
         User newUser = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword())) // 👈 hash here
-                .role("USER")
+                .role(finalRole.name())
+                .tokenVersion(1L)
                 .build();
 
         userRepository.save(newUser);
